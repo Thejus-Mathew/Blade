@@ -130,14 +130,7 @@ export default function ExpensesDisplay({ members, types }) {
         // Add a column for each member
         members.forEach((member) => {
           const split = expense.splits.find((s) => s.member._id.toString() === member._id.toString())
-
-          // For the person who paid, show (split amount - total amount)
-          if (expense.paidBy._id.toString() === member._id.toString()) {
-            const splitAmount = split ? split.amount : 0
-            row[member.name] = (splitAmount - expense.totalAmount).toFixed(2)
-          } else {
-            row[member.name] = split ? split.amount.toFixed(2) : "0.00"
-          }
+          row[member.name] = split ? split.amount.toFixed(2) : "0.00"
         })
 
         return row
@@ -157,17 +150,9 @@ export default function ExpensesDisplay({ members, types }) {
         let total = 0
 
         allExpenses.forEach((expense) => {
-          // If this member paid for the expense
-          if (expense.paidBy._id.toString() === member._id.toString()) {
-            const split = expense.splits.find((s) => s.member._id.toString() === member._id.toString())
-            const splitAmount = split ? split.amount : 0
-            total += splitAmount - expense.totalAmount
-          } else {
-            // If this member is part of the split
-            const split = expense.splits.find((s) => s.member._id.toString() === member._id.toString())
-            if (split) {
-              total += split.amount
-            }
+          const split = expense.splits.find((s) => s.member._id.toString() === member._id.toString())
+          if (split) {
+            total += split.amount
           }
         })
 

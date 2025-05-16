@@ -18,7 +18,6 @@ export async function middleware(req) {
  
   if (!token) {
     if (pathname.startsWith('/expenses') || ['/','/dues','/expenses','/members','/expense-types'].includes(pathname)) {
-      console.log(`No token found, redirecting to /login from ${pathname}`);
       return NextResponse.redirect(new URL('/login', req.url));
     }
     return NextResponse.next();
@@ -27,16 +26,13 @@ export async function middleware(req) {
   const jwtdata = await verifyToken(token);
  
   if (!jwtdata?.status) {    
-    console.log(`Invalid token detected on ${pathname}`);
     if (pathname !== '/login') {
-      console.log(`Redirecting to /login due to invalid token from ${pathname}`);
       return NextResponse.redirect(new URL('/login', req.url));
     }
     return NextResponse.next();
   }
  
   if (pathname === '/login') {
-    console.log(`Token found, redirecting to / from ${pathname}`);
     return NextResponse.redirect(new URL('/', req.url));
   }
  

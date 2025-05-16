@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache"
 import connectDB from "@/lib/db"
 import Expense from "@/models/expense"
+import Member from "@/models/member"
 
 export async function addExpenseAction(data) {
   try {
@@ -88,10 +89,8 @@ export async function getDuesAction() {
   try {
     await connectDB()
 
-    // Get all expenses with populated fields
     const expenses = await Expense.find().populate("paidBy", "name").populate("splits.member", "name")
 
-    // Calculate raw dues (before simplification)
     const rawDues = []
 
     expenses.forEach((expense) => {
@@ -100,7 +99,6 @@ export async function getDuesAction() {
       expense.splits.forEach((split) => {
         const member = split.member
 
-        // Skip if the person paid for themselves
         if (paidBy._id.toString() === member._id.toString()) return
 
         rawDues.push({
@@ -111,10 +109,7 @@ export async function getDuesAction() {
       })
     })
 
-    // Import the simplifyDues function from utils
     const { simplifyDues } = await import("@/lib/utils")
-
-    // Simplify dues by removing middlemen
     const simplifiedDues = simplifyDues(rawDues)
 
     return JSON.parse(JSON.stringify(simplifiedDues))
@@ -127,6 +122,7 @@ export async function getAnExpenseAction(id) {
   try {
     await connectDB()
 
+    const expenses = await Expense.find({_id:id}).populate("paidBy", "name").populate("splits.member", "name")
     const expense = await Expense.findOne({_id:id})
       .populate("paidBy", "name")
       .populate("splits.member", "name")
