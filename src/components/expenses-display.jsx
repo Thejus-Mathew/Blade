@@ -33,7 +33,7 @@ export default function ExpensesDisplay({ members, types, expenses, params, tota
 
   const handleFilterSubmit = (e) => {
     e.preventDefault()
-    refetch()
+    refetch(1)
   }
 
   const handleExport = async () => {
@@ -135,13 +135,15 @@ export default function ExpensesDisplay({ members, types, expenses, params, tota
     }
   }
 
-  const refetch = () => {
+  const refetch = (pageValue) => {
+    pageValue = pageValue || page
+
     const newParams = new URLSearchParams()
     if (startDate) newParams.set("startDate", startDate)
     if (endDate) newParams.set("endDate", endDate)
     if (paidBy) newParams.set("paidBy", paidBy)
     if (type) newParams.set("type", type)
-    if (page) newParams.set("page", page)      
+    if (pageValue) newParams.set("page", pageValue)      
 
     router.push(`/expenses?${newParams.toString()}`)
   }
