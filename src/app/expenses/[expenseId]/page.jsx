@@ -1,4 +1,5 @@
 import { getAnExpenseAction } from "@/app/actions/expense-actions"
+import BackButton from "@/components/back-button"
 
 const ExpensePage =async ({params}) => {
     const {expenseId} = await params
@@ -6,7 +7,8 @@ const ExpensePage =async ({params}) => {
     
   return (
      <div className="max-w-4xl mx-auto p-4">
-      <div className="bg-white dark:bg-gray-800 shadow-lg rounded-2xl p-6 space-y-4">
+      <BackButton/>
+      <div className="bg-white dark:bg-gray-800 shadow-lg rounded-2xl p-6 space-y-4 border">
         <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4">
           <div>
             <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-100">{expense?.type}</h2>
@@ -30,7 +32,7 @@ const ExpensePage =async ({params}) => {
             {expense?.splits?.map((split) => (
               <div
                 key={split?._id}
-                className="bg-gray-50 dark:bg-gray-100 p-4 rounded-xl border border-gray-200 dark:border-gray-600"
+                className="bg-gray-50 dark:bg-gray-100 p-4 rounded-xl border border-gray-400 dark:border-gray-600"
               >
                 <p className="text-gray-800 dark:text-gray-900 font-semibold">{split?.member?.name}</p>
                 <p className="text-gray-600 dark:text-gray-800 text-sm">Owes: ₹{split?.amount?.toFixed(2)}</p>

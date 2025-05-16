@@ -1,110 +1,46 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { useSearchParams, useRouter } from "next/navigation"
+import { useRouter } from "next/navigation"
 import { toast } from "react-toastify"
 import { Download, Trash2,ExternalLink } from "lucide-react"
 import Card from "./card"
 import Button from "./button"
-import LoadingSpinner from "./loading-spinner"
 import { formatDateTime, formatCurrency, exportToExcel } from "@/lib/utils"
-import { getExpensesAction, deleteExpenseAction } from "@/app/actions/expense-actions"
+import { deleteExpenseAction, getAllExpensesAction } from "@/app/actions/expense-actions"
 import Link from "next/link"
 
-export default function ExpensesDisplay({ members, types }) {
+export default function ExpensesDisplay({ members, types, expenses, params, totalPages }) {
+  totalPages = Number(totalPages)
+  
   const router = useRouter()
-  const searchParams = useSearchParams()
-
-  const [expenses, setExpenses] = useState([])
-  const [pagination, setPagination] = useState({
-    total: 0,
-    page: 0,
-    limit: 15,
-    totalPages: 0,
-  })
-
-  const [isLoading, setIsLoading] = useState(true)
   const [isExporting, setIsExporting] = useState(false)
   const [isDeleting, setIsDeleting] = useState({})
 
-  // Filter states
-  const [startDate, setStartDate] = useState("")
-  const [endDate, setEndDate] = useState("")
-  const [paidBy, setPaidBy] = useState("")
-  const [type, setType] = useState("")
+  const [startDate, setStartDate] = useState(params.startDate || "")
+  const [endDate, setEndDate] = useState(params.endDate || "")
+  const [paidBy, setPaidBy] = useState(params.paidBy)
+  const [type, setType] = useState(params.type)
+  const [page, setPage] = useState(Number(params.page) || 1)
 
   useEffect(()=>{
-    setPagination((pre)=>{
-      return {
-        total: expenses.length,
-        page: pre.page,
-        limit: pre.limit,
-        totalPages: Math.ceil(expenses.length/pre.limit),
-      }
-    })
-  },[expenses])
-
-  useEffect(() => {
-    // Set initial filter values from URL params
-    const startDate = searchParams.get("startDate") || ""
-    const endDate = searchParams.get("endDate") || ""
-    const paidBy = searchParams.get("paidBy") || ""
-    const type = searchParams.get("type") || ""
-
-    setStartDate(startDate)
-    setEndDate(endDate)
-    setPaidBy(paidBy)
-    setType(type)
-
-    // Apply initial filters
-    applyFilters(startDate, endDate, paidBy, type)
-  }, [searchParams])
-
-  const applyFilters = async (startDate = "", endDate = "", paidBy = "", type = "") => {
-    try {      
-      setIsLoading(true)
-
-      // Calculate date range based on filter type
-      let start = startDate
-      let end = endDate
-
-      // Update URL with filters
-      const params = new URLSearchParams()
-      if (start) params.set("startDate", start)
-      if (end) params.set("endDate", end)
-      if (paidBy) params.set("paidBy", paidBy)
-      if (type) params.set("type", type)
-
-      // Fetch expenses with filters      
-      const result = await getExpensesAction({
-        startDate: start,
-        endDate: end,
-        paidBy,
-        type
-      })
-
-      setExpenses(result)
-      router.push(`/expenses?${params.toString()}`)
-
-    } catch (error) {
-      console.error("Error applying filters:", error)
-      toast.error("Failed to load expenses")
-    } finally {
-      setIsLoading(false)
-    }
-  }
+  setStartDate(params.startDate || "")
+  setEndDate(params.endDate || "")
+  setPaidBy(params.paidBy)
+  setType(params.type)
+  setPage(Number(params.page) || 1)
+  },[params])
 
   const handleFilterSubmit = (e) => {
     e.preventDefault()
-    applyFilters(startDate, endDate, paidBy, type)
+    refetch()
   }
 
   const handleExport = async () => {
     try {
       setIsExporting(true)
 
-      // Get all expenses without pagination
-      const allExpenses = await getExpensesAction({
+      const allExpenses = await getAllExpensesAction({
         startDate,
         endDate,
         paidBy,
@@ -188,11 +124,10 @@ export default function ExpensesDisplay({ members, types }) {
       setIsDeleting((prev) => ({ ...prev, [id]: true }))
 
       await deleteExpenseAction(id)
-
-      applyFilters(startDate, endDate, paidBy, type)
-      
       toast.success("Expense deleted successfully")
-    } catch (error) {
+      
+      refetch()
+      } catch (error) {
       console.error("Error deleting expense:", error)
       toast.error("Failed to delete expense")
     } finally {
@@ -200,6 +135,22 @@ export default function ExpensesDisplay({ members, types }) {
     }
   }
 
+  const refetch = () => {
+    const newParams = new URLSearchParams()
+    if (startDate) newParams.set("startDate", startDate)
+    if (endDate) newParams.set("endDate", endDate)
+    if (paidBy) newParams.set("paidBy", paidBy)
+    if (type) newParams.set("type", type)
+    if (page) newParams.set("page", page)      
+
+    router.push(`/expenses?${newParams.toString()}`)
+  }
+
+  useEffect(()=>{
+    if(page !== Number(params.page)){
+      refetch()
+    }
+  },[page])
   
 
   return (
@@ -289,12 +240,8 @@ export default function ExpensesDisplay({ members, types }) {
       </Card>
 
       <Card>
-        {isLoading ? (
-          <div className="flex justify-center py-8">
-            <LoadingSpinner size="large" />
-          </div>
-        ) : expenses.slice(pagination.limit*(pagination.page),(pagination.limit*(pagination.page))+pagination.limit).length > 0 ? (
-          <div className="overflow-x-auto">
+        {expenses.length > 0 ? (
+          <div className="overflow-x-auto pb-6">
             <table className="w-full border-collapse table-responsive">
               <thead>
                 <tr className="bg-gray-50 dark:bg-gray-800">
@@ -306,7 +253,7 @@ export default function ExpensesDisplay({ members, types }) {
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
-                {expenses.slice(pagination.limit*(pagination.page),(pagination.limit*(pagination.page))+pagination.limit).map((expense) => (
+                {expenses.map((expense) => (
                   <tr key={expense._id} className="hover:bg-gray-50 dark:hover:bg-gray-800">
                     <td className="px-4 py-4 text-sm">{expense.type}</td>
                     <td className="px-4 py-4 text-sm min-w-[100px]">{expense.paidBy.name}</td>
@@ -336,40 +283,61 @@ export default function ExpensesDisplay({ members, types }) {
             </table>
 
             {/* Pagination */}
-            {pagination.totalPages > 1 && (
+            {totalPages > 1 && (
               <div className="flex justify-center mt-6">
                 <nav className="flex items-center space-x-2">
                   <Button
                     variant="outline"
                     size="small"
-                    onClick={() => setPagination({...pagination,page:pagination.page-1})}
-                    disabled={pagination.page === 0}
+                    onClick={() => setPage(page - 1)}
+                    disabled={page === 1}
                   >
                     Previous
                   </Button>
+                  <Button
+                    variant={page === 1 ? "primary" : "outline"}
+                    size="small"
+                    onClick={() => setPage(1)}
+                  >
+                    1
+                  </Button>
 
-                  {Array.from({ length: pagination.totalPages }, (_, i) => i + 1).map((page) => (
-                    <Button
-                      key={page}
-                      variant={page === pagination.page+1 ? "primary" : "outline"}
-                      size="small"
-                      onClick={() => setPagination({...pagination,page:page-1})}
-                    >
-                      {page}
-                    </Button>
-                  ))}
+                  {[-2,-1, 0, 1, 2].map((offset) => {
+                    const p = page + offset;
+                    if((p > 1 && p < totalPages) && [-1,0,1].includes(offset)) {
+                      return <Button
+                            key={offset}
+                            variant={p === page ? "primary" : "outline"}
+                            size="small"
+                            onClick={() => setPage(p)}
+                          >
+                            {p}
+                          </Button>
+                    }else if((p>1 && p<(totalPages)) && [-2,2].includes(offset)){
+                      return <span key={offset} className="px-2">...</span>
+                    }
+                    return null
+                  })}
 
+                  <Button
+                    variant={page===totalPages? "primary" : "outline"}
+                    size="small"
+                    onClick={() => setPage(totalPages)}
+                  >
+                    {totalPages}
+                  </Button>
                   <Button
                     variant="outline"
                     size="small"
-                    onClick={() => setPagination({...pagination,page:pagination.page+1})}
-                    disabled={pagination.page+1 === pagination.totalPages}
+                    onClick={() => setPage(page + 1)}
+                    disabled={page === totalPages}
                   >
                     Next
                   </Button>
                 </nav>
               </div>
             )}
+
           </div>
         ) : (
           <div className="text-center py-8 text-gray-500">

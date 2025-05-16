@@ -29,7 +29,7 @@ export async function addExpenseAction(data) {
   }
 }
 
-export async function getExpensesAction(filters) {  
+export async function getAllExpensesAction(filters) {  
   try {
     await connectDB()
 
@@ -121,8 +121,6 @@ export async function getDuesAction() {
 export async function getAnExpenseAction(id) {  
   try {
     await connectDB()
-
-    const expenses = await Expense.find({_id:id}).populate("paidBy", "name").populate("splits.member", "name")
     const expense = await Expense.findOne({_id:id})
       .populate("paidBy", "name")
       .populate("splits.member", "name")
@@ -130,5 +128,51 @@ export async function getAnExpenseAction(id) {
     return JSON.parse(JSON.stringify(expense))
   } catch (error) {
     console.error("Error getting expenses:", error)
+  }
+}
+export async function getExpensesAction(startDate, endDate, paidBy, type, page=1) {  
+  try {
+    await connectDB()
+    const limit = 13
+    const query = {}
+
+    if (startDate && endDate) {
+      query.date = {
+        $gte: new Date(startDate),
+        $lte: new Date(endDate),
+      }
+    } else if (startDate) {
+      query.date = { $gte: new Date(startDate) }
+    } else if (endDate) {
+      query.date = { $lte: new Date(endDate) }
+    }
+
+    if (paidBy) {
+      query.paidBy = paidBy
+    }
+
+    if (type) {
+      query.type = { $regex: type, $options: "i" }
+    }
+
+    const skip = (page - 1) * limit
+
+    const [expenses, total] = await Promise.all([
+      Expense.find(query)
+        .populate("paidBy", "name")
+        .populate("splits.member", "name")
+        .sort({ date: -1 })
+        .skip(skip)
+        .limit(limit),
+      Expense.countDocuments(query),
+    ])
+
+    return {
+      expenses: JSON.parse(JSON.stringify(expenses)),
+      totalPages: Math.ceil(total / limit),
+    }
+  } catch (error) {
+    console.error("Error getting expenses:", error)
+    return { expenses: [],totalPages: 1 }
   }
 }
