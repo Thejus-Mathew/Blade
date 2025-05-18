@@ -22,11 +22,13 @@ export default function ExpensesDisplay({ members, types, expenses, params, tota
   const [paidBy, setPaidBy] = useState(params.paidBy)
   const [type, setType] = useState(params.type)
   const [page, setPage] = useState(Number(params.page) || 1)
+  const [paidThrough, setPaidThrough] = useState(params.paidThrough)
 
   useEffect(()=>{
   setStartDate(params.startDate || "")
   setEndDate(params.endDate || "")
   setPaidBy(params.paidBy)
+  setPaidThrough(params.paidThrough)
   setType(params.type)
   setPage(Number(params.page) || 1)
   },[params])
@@ -45,6 +47,7 @@ export default function ExpensesDisplay({ members, types, expenses, params, tota
         endDate,
         paidBy,
         type,
+        paidThrough
       })
 
       // Create a map of all member IDs to prepare columns
@@ -58,9 +61,10 @@ export default function ExpensesDisplay({ members, types, expenses, params, tota
         const row = {
           "Sl No": index + 1,
           "Expense Type": expense.type,
+          "Payment Mode":expense.paidThrough,
           "Paid By": expense.paidBy.name,
-          Date: formatDateTime(expense.date),
           "Total Amount": expense.totalAmount.toFixed(2),
+          Date: formatDateTime(expense.date),
         }
 
         // Add a column for each member
@@ -76,9 +80,10 @@ export default function ExpensesDisplay({ members, types, expenses, params, tota
       const totalsRow = {
         "Sl No": "",
         "Expense Type": "",
+        "Payment Mode":"",
         "Paid By": "",
-        Date: "",
         "Total Amount": allExpenses.reduce((sum, exp) => sum + exp.totalAmount, 0).toFixed(2),
+        Date: "",
       }
 
       // Calculate totals for each member
@@ -98,13 +103,10 @@ export default function ExpensesDisplay({ members, types, expenses, params, tota
       exportData.push(totalsRow)
 
       // Generate filename based on filters
-      let filename = "Blade"
-      if (startDate || endDate) {
-        filename += `-${startDate}-to-${endDate}`
-      }
+      let filename = `BLADE REPORT - (${startDate || "-"} to ${endDate || "-"})${paidBy?` - Paid By_${members.find(item=>item._id===paidBy)?.name}`:""}${type?` - Expense type_${type}`:""}${paidThrough?` - Paid Through_${paidThrough}`:""}`
 
       // Export to Excel
-      exportToExcel(exportData, filename, startDate, endDate)
+      exportToExcel(exportData, filename, startDate, endDate, members.find(item=>item._id===paidBy)?.name, paidThrough, type)
 
       toast.success("Expenses exported successfully")
     } catch (error) {
@@ -142,17 +144,12 @@ export default function ExpensesDisplay({ members, types, expenses, params, tota
     if (startDate) newParams.set("startDate", startDate)
     if (endDate) newParams.set("endDate", endDate)
     if (paidBy) newParams.set("paidBy", paidBy)
+    if (paidThrough) newParams.set("paidThrough", paidThrough)
     if (type) newParams.set("type", type)
     if (pageValue) newParams.set("page", pageValue)      
 
     router.push(`/expenses?${newParams.toString()}`)
   }
-
-  useEffect(()=>{
-    if(page !== Number(params.page)){
-      refetch()
-    }
-  },[page])
   
 
   return (
@@ -221,17 +218,40 @@ export default function ExpensesDisplay({ members, types, expenses, params, tota
               </select>
             </div>
 
-            <Link href={"/expenses"} className="block">
-              <Button type="reset" variant="" className="bg-gray-500" style={{width:"100%"}}>
-                Reset Filter
-              </Button>
-            </Link>
+
+            <div>
+              <label htmlFor="type" className="block text-sm font-medium text-gray-700 mb-1 dark:text-gray-300">
+                Payment Mode
+              </label>
+              <select
+                id="paidThrough"
+                value={paidThrough}
+                onChange={(e) => setPaidThrough(e.target.value)}
+                className="w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-purple-600"
+              >
+                <option value="" className="dark:text-gray-800">All Payment Modes</option>
+                  <option className="dark:text-gray-800" value={"Credit Card"}>
+                    {"Credit Card"}
+                  </option>
+                  <option className="dark:text-gray-800" value={"Bank Transfer"}>
+                    {"Bank Transfer"}
+                  </option>
+              </select>
+            </div>
           </div>
 
           <div className="flex justify-between pt-4">
-            <Button type="submit" variant="primary">
-              Apply Filters
-            </Button>
+            <span className="flex gap-2">
+              <Link href={"/expenses"} >
+                <Button type="reset" variant="secondary" onClick={()=>{setType("");setPaidBy("");setPaidThrough("")}} >
+                  Reset Filter
+                </Button>
+              </Link>
+              
+              <Button type="submit" variant="primary">
+                Apply Filters
+              </Button>
+            </span>
 
             <Button type="button" variant="secondary" onClick={handleExport} isLoading={isExporting}>
               <Download className="w-4 h-4 mr-2" />
@@ -291,7 +311,7 @@ export default function ExpensesDisplay({ members, types, expenses, params, tota
                   <Button
                     variant="outline"
                     size="small"
-                    onClick={() => setPage(page - 1)}
+                    onClick={() => refetch(page - 1)}
                     disabled={page === 1}
                   >
                     Previous
@@ -299,7 +319,7 @@ export default function ExpensesDisplay({ members, types, expenses, params, tota
                   <Button
                     variant={page === 1 ? "primary" : "outline"}
                     size="small"
-                    onClick={() => setPage(1)}
+                    onClick={() => refetch(1)}
                   >
                     1
                   </Button>
@@ -311,7 +331,7 @@ export default function ExpensesDisplay({ members, types, expenses, params, tota
                             key={offset}
                             variant={p === page ? "primary" : "outline"}
                             size="small"
-                            onClick={() => setPage(p)}
+                            onClick={() => refetch(p)}
                           >
                             {p}
                           </Button>
@@ -324,14 +344,14 @@ export default function ExpensesDisplay({ members, types, expenses, params, tota
                   <Button
                     variant={page===totalPages? "primary" : "outline"}
                     size="small"
-                    onClick={() => setPage(totalPages)}
+                    onClick={() => refetch(totalPages)}
                   >
                     {totalPages}
                   </Button>
                   <Button
                     variant="outline"
                     size="small"
-                    onClick={() => setPage(page + 1)}
+                    onClick={() => refetch(page + 1)}
                     disabled={page === totalPages}
                   >
                     Next

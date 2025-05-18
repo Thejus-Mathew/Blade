@@ -44,11 +44,12 @@ export function calculateRemainingEvenSplit(totalAmount, manualSplits, totalPeop
 }
 
 
-export function exportToExcel(data, fileName, startDate, endDate) {
+export function exportToExcel(data, fileName, startDate, endDate, paidBy, paidThrough, type) {
   const worksheet = XLSX.utils.json_to_sheet(data, { origin: "A2" }) // leave A1 for heading
 
   // Add heading
-  XLSX.utils.sheet_add_aoa(worksheet, [[`Blade Expenses Report ( ${startDate} - ${endDate} )`]], { origin: "A1" })
+  XLSX.utils.sheet_add_aoa(worksheet, [[`BLADE REPORT - (${startDate || "-"} to ${endDate || "-"})${paidBy?` - Paid By: ${paidBy}`:""}${type?` - Expense type: ${type}`:""}${paidThrough?` - Paid Through: ${paidThrough}`:""}`
+]], { origin: "A1" })
 
   // Merge heading across all columns
   worksheet["!merges"] = [

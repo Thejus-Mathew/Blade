@@ -128,7 +128,6 @@ export default function AddExpenseForm({ members , types}) {
       await addExpenseAction({
         ...data,
         splits,
-        date:Date.now()
       })
 
       toast.success("Expense added successfully")
@@ -219,7 +218,7 @@ export default function AddExpenseForm({ members , types}) {
               {...register("paidThrough", { required: "Paid Through is required" })}
             >
               <option value="" className="dark:text-gray-800">Select Payment Option</option>
-              <option className="dark:text-gray-800"value={"Credit Card"}>
+              <option className="dark:text-gray-800" value={"Credit Card"}>
                 {"Credit Card"}
               </option>
               <option className="dark:text-gray-800" value={"Bank Transfer"}>

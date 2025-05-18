@@ -13,7 +13,6 @@ export async function addExpenseAction(data) {
       type: data.type,
       totalAmount: data.totalAmount,
       paidBy: data.paidBy,
-      date: new Date(data.date),
       splits: data.splits,
       paidThrough: data.paidThrough
     })
@@ -33,27 +32,31 @@ export async function getAllExpensesAction(filters) {
   try {
     await connectDB()
 
-    const { startDate, endDate, paidBy, type} = filters
+    const { startDate, endDate, paidBy, paidThrough, type} = filters
 
-    const query = {}
+    const query = {}    
 
     if (startDate && endDate) {
       query.date = {
-        $gte: new Date(startDate),
-        $lte: new Date(endDate),
+        $gte: new Date(`${startDate}T00:00:00`),
+        $lte: new Date(`${endDate}T00:00:00`),
       }
     } else if (startDate) {
-      query.date = { $gte: new Date(startDate) }
+      query.date = { $gte: new Date(`${startDate}T00:00:00`) }
     } else if (endDate) {
-      query.date = { $lte: new Date(endDate) }
+      query.date = { $lte: new Date(`${endDate}T00:00:00`) }
     }
 
     if (paidBy) {
       query.paidBy = paidBy
     }
 
+    if (paidThrough) {
+      query.paidThrough = paidThrough
+    }
+
     if (type) {
-      query.type = { $regex: type, $options: "i" }
+      query.type = type
     }
 
 
@@ -130,7 +133,7 @@ export async function getAnExpenseAction(id) {
     console.error("Error getting expenses:", error)
   }
 }
-export async function getExpensesAction(startDate, endDate, paidBy, type, page=1) {  
+export async function getExpensesAction(startDate, endDate, paidBy, type,paidThrough, page=1) {  
   try {
     await connectDB()
     const limit = 13
@@ -138,21 +141,25 @@ export async function getExpensesAction(startDate, endDate, paidBy, type, page=1
 
     if (startDate && endDate) {
       query.date = {
-        $gte: new Date(startDate),
-        $lte: new Date(endDate),
+        $gte: new Date(`${startDate}T00:00:00`),
+        $lte: new Date(`${endDate}T00:00:00`),
       }
     } else if (startDate) {
-      query.date = { $gte: new Date(startDate) }
+      query.date = { $gte: new Date(`${startDate}T00:00:00`) }
     } else if (endDate) {
-      query.date = { $lte: new Date(endDate) }
+      query.date = { $lte: new Date(`${endDate}T00:00:00`) }
     }
 
     if (paidBy) {
       query.paidBy = paidBy
     }
 
+    if (paidThrough) {
+      query.paidThrough = paidThrough
+    }
+
     if (type) {
-      query.type = { $regex: type, $options: "i" }
+      query.type = type
     }
 
     const skip = (page - 1) * limit
