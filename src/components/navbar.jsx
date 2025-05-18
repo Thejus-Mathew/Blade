@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { Home, DollarSign, Users, FileText, BookCopy } from "lucide-react"
+import { Home, DollarSign, Users, FileText, BookCopy, ChartPie } from "lucide-react"
 
 export default function Navbar() {
   const pathname = usePathname()
@@ -13,6 +13,8 @@ export default function Navbar() {
     { name: "Expenses", href: "/expenses", icon: <FileText className="w-5 h-5" /> },
     { name: "Members", href: "/members", icon: <Users className="w-5 h-5" /> },
     { name: "Expense Types", href: "/expense-types", icon: <BookCopy className="w-5 h-5" /> },
+        { name: "Insights", href: "/insights", icon: <ChartPie className="w-5 h-5" /> },
+
   ]
 
   return (

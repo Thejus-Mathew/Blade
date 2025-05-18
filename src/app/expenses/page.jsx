@@ -14,7 +14,7 @@ export default async function ExpensesPage({searchParams}) {
     const firstDay = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-01`;    
     startDate = firstDay
   }
-  const expensesResult = await getExpensesAction(startDate,endDate,paidBy,type,paidThrough,page)  
+  const expensesResult = await getExpensesAction(startDate,endDate,paidBy,type,paidThrough,page)    
   return (
     <div className="max-w-6xl mx-auto">
       <h1 className="text-3xl font-bold mb-6">Expenses</h1>

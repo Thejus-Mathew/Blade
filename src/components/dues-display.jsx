@@ -3,6 +3,7 @@
 import { useMemo } from "react"
 import Card from "./card"
 import { formatCurrency } from "@/lib/utils"
+import { TrendingUp, Users } from "lucide-react"
 
 export default function DuesDisplay({ members, dues }) {
   // Create a map of member IDs to names for easy lookup
@@ -53,7 +54,7 @@ export default function DuesDisplay({ members, dues }) {
                 .map(([memberId, amount]) => (
                   <div key={memberId} className="flex justify-between items-center">
                     <span className="font-medium">{memberMap[memberId]}</span>
-                    <span className="text-red-600 font-medium">{formatCurrency(amount)}</span>
+                    <span className="dark:text-red-300 text-red-600 font-medium">{formatCurrency(amount)}</span>
                   </div>
                 ))}
             </div>
@@ -70,7 +71,7 @@ export default function DuesDisplay({ members, dues }) {
                 .map(([memberId, amount]) => (
                   <div key={memberId} className="flex justify-between items-center">
                     <span className="font-medium">{memberMap[memberId]}</span>
-                    <span className="text-green-600 font-medium">{formatCurrency(amount)}</span>
+                    <span className="text-green-600 dark:text-green-300 font-medium">{formatCurrency(amount)}</span>
                   </div>
                 ))}
             </div>
@@ -83,20 +84,30 @@ export default function DuesDisplay({ members, dues }) {
       {/* Detailed Dues */}
       <Card title="Detailed Dues">
         {dues.length > 0 ? (
-          <div className="space-y-8">
+          <div className="space-y-4">
             {Object.entries(duesByPayer).map(([payerId, payerDues]) => (
-              <div key={payerId} className="space-y-3">
-                <h3 className="font-semibold text-lg">{memberMap[payerId]} owes:</h3>
-                <div className="pl-4 space-y-2">
-                  {payerDues.map((due, index) => (
-                    <div key={index} className="flex justify-between items-center">
-                      <span>{memberMap[due.to]}</span>
-                      <span className="font-medium">{formatCurrency(due.amount)}</span>
-                    </div>
-                  ))}
+              payerDues.map((due, index) => (
+              <div key={index} className="flex items-center justify-between p-3 border rounded-lg">
+                <div className="flex items-center gap-2">
+                  <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
+                    <Users className="h-4 w-4 text-primary" />
+                  </div>
+                  <div>
+                    <p className="font-medium">{memberMap[payerId]}</p>
+                    <p className="text-sm text-muted-foreground">owes</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div>
+                    <p className="font-medium text-right">{memberMap[due.to]}</p>
+                    <p className="text-sm text-muted-foreground text-right">{formatCurrency(due.amount)}</p>
+                  </div>
+                  <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
+                    <TrendingUp className="h-4 w-4 text-primary" />
+                  </div>
                 </div>
               </div>
-            ))}
+              ))))}
           </div>
         ) : (
           <p className="text-gray-500">No dues to settle</p>
