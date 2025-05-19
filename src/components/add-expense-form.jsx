@@ -29,7 +29,7 @@ export default function AddExpenseForm({ members , types}) {
   useEffect(() => {
     const initialSelectedMembers = {}
     members.forEach((member) => {
-      initialSelectedMembers[member._id] = true
+      initialSelectedMembers[member._id] = false
     })
     setSelectedMembers(initialSelectedMembers)
   }, [members])
