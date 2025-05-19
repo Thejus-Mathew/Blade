@@ -38,6 +38,29 @@ const COLORS = [
 
 export default function InsightDisplay({ members, types, expenses }) {
   const [activeTab, setActiveTab] = useState("Overview");
+  const [individual,setIndividual]=useState(members[0]?._id || null)
+  const [individualData,setIndividualData]=useState({timeData:[],typeData:[]})
+  
+  useEffect(()=>{
+    setIndividualData(()=>{
+      const arr = []
+      expenses.forEach(item=>{
+        const split = item.splits.find(item2=>item2.member._id===individual)
+        if(split){
+          arr.push({member:split.member.name,amount:split.amount,type:item.type,date:format(parseISO(item.date), 'yyyy-MM-dd')})
+        }
+      })
+      const timeData = arr.reduce((obj,item)=>{
+        obj[item.date]=(obj[item.date] || 0)+item.amount
+        return obj
+      },{})
+      const typeData = arr.reduce((obj,item)=>{
+        obj[item.type]=(obj[item.type] || 0) + item.amount
+        return obj
+      },{})
+      return {timeData:Object.entries(timeData).map(([date,amount])=>({date,amount})),typeData:Object.entries(typeData).map(([name,amount])=>({name,amount})).sort((a, b) => b.amount - a.amount)}
+    })
+  },[individual])  
 
   const[isDarkMode,setIsDarkMode] = useState(true)
   useEffect(() => {
@@ -211,30 +234,37 @@ export default function InsightDisplay({ members, types, expenses }) {
             </p>
         </Card>        
       </div>
-      <div className="flex space-x-4 bg-gray-100 dark:bg-gray-800 p-2 py-4 w-full ps-4 rounded-md w-fit ">
+      <div className="flex gap-4 bg-gray-100 dark:bg-gray-800 p-2 py-4 w-full ps-4 rounded-md w-fit flex-wrap">
         <button onClick={() => setActiveTab("Overview")} 
-            className={`px-3 py-1 rounded-md text-sm font-medium transition ${activeTab === "Overview"
+            className={`px-3 border py-1 rounded-md text-sm font-medium transition ${activeTab === "Overview"
                 ? "bg-white dark:bg-gray-200 text-black dark:text-black shadow-sm"
                 : "text-gray-500 dark:text-gray-300 hover:text-black dark:hover:text-white"}`}
         >
             Overview
         </button>
         <button onClick={() => setActiveTab("Members")} 
-            className={`px-3 py-1 rounded-md text-sm font-medium transition ${activeTab === "Members"
+            className={`px-3 border py-1 rounded-md text-sm font-medium transition ${activeTab === "Members"
                 ? "bg-white dark:bg-gray-200 text-black dark:text-black shadow-sm"
                 : "text-gray-500 dark:text-gray-300 hover:text-black dark:hover:text-white"}`}
         >
             Members
         </button>
         <button onClick={() => setActiveTab("Categories")} 
-            className={`px-3 py-1 rounded-md text-sm font-medium transition ${activeTab === "Categories"
+            className={`px-3 border py-1 rounded-md text-sm font-medium transition ${activeTab === "Categories"
                 ? "bg-white dark:bg-gray-200 text-black dark:text-black shadow-sm"
                 : "text-gray-500 dark:text-gray-300 hover:text-black dark:hover:text-white"}`}
         >
             Categories
         </button>
+        <button onClick={() => setActiveTab("Individual")} 
+            className={`px-3 border py-1 rounded-md text-sm font-medium transition ${activeTab === "Individual"
+                ? "bg-white dark:bg-gray-200 text-black dark:text-black shadow-sm"
+                : "text-gray-500 dark:text-gray-300 hover:text-black dark:hover:text-white"}`}
+        >
+            Individual
+        </button>
         <button onClick={() => setActiveTab("Balances")} 
-            className={`px-3 py-1 rounded-md text-sm font-medium transition ${activeTab === "Balances"
+            className={`px-3 border py-1 rounded-md text-sm font-medium transition ${activeTab === "Balances"
                 ? "bg-white dark:bg-gray-200 text-black dark:text-black shadow-sm"
                 : "text-gray-500 dark:text-gray-300 hover:text-black dark:hover:text-white"}`}
         >
@@ -446,6 +476,80 @@ export default function InsightDisplay({ members, types, expenses }) {
               </div>
           </Card>
         </div>
+        :activeTab==="Individual"?
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden">
+              <div className="grid grid-cols-2 border-b border-gray-200 dark:border-gray-700">
+                <div className="px-6 py-4">
+                  <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Individual Insight</h3>
+                  <p className="text-xs text-muted-foreground mt-2">Each members spending trend</p>
+                </div>
+                <span className="flex items-center pe-5 justify-end">
+                  <select className="border w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-purple-600 md:w-75" onChange={(e)=>setIndividual(e.target.value)}>
+                    {
+                      members.map(item=>(
+                        <option value={item._id} key={item._id} className="dark:text-gray-800">{item.name}</option>
+                      ))
+                    }
+                  </select>
+                </span>
+              </div>
+            <div className="p-6 grid gap-4 md:grid-cols-2">
+              <div className="h-[300px]">
+                {individualData.timeData.length > 0 ? (
+                  <ResponsiveContainer width="100%" height="100%">
+                    <LineChart data={individualData.timeData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
+                      <CartesianGrid strokeDasharray="3 3" />
+                      <XAxis dataKey="date" tickFormatter={(date) => format(parseISO(date), "MMM dd")} tick={{ fill: isDarkMode ? "#b9b9b9" : "#707070" }}/>
+                      <YAxis tick={{ fill: isDarkMode ? "#b9b9b9" : "#707070" }}/>
+                      <Tooltip
+                      contentStyle={{
+                          backgroundColor: isDarkMode ? "#1f2937" : "#ffffff",
+                          color: isDarkMode ? "#ffffff" : "#000000",
+                          border: "1px solid #ccc",
+                          borderRadius: "6px",
+                      }}
+                      />
+                      <Legend />
+                      <Line
+                        type="monotone"
+                        dataKey="amount"
+                        stroke="#8884d8"
+                        activeDot={{ r: 8 }}
+                        name="Expense Amount"
+                      />
+                    </LineChart>
+                  </ResponsiveContainer>
+                ) : (
+                  <div className="flex h-full items-center justify-center py-8">
+                    <p className="text-muted-foreground">No data available for the selected period</p>
+                  </div>
+                )}
+              </div>
+              <div className="h-[300px]">
+                {individualData.typeData.length > 0 ? (
+                    <ResponsiveContainer width="100%" height="100%">
+                      <BarChart data={individualData.typeData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
+                        <XAxis dataKey="name" tick={{ fill: isDarkMode ? "#b9b9b9" : "#707070" }} />
+                        <YAxis tick={{ fill: isDarkMode ? "#b9b9b9" : "#707070" }}/>
+                        <Tooltip formatter={(value) => [`₹${value.toFixed(2)}`, "Amount"]}
+                        contentStyle={{
+                            backgroundColor: isDarkMode ? "#1f2937" : "#ffffff",
+                            color: isDarkMode ? "#ffffff" : "#000000",
+                            border: "1px solid #ccc",
+                            borderRadius: "6px",
+                        }} />
+                        <Legend />
+                        <Bar dataKey="amount" name="Amount" fill="#8884d8" />
+                      </BarChart>
+                    </ResponsiveContainer>
+                ) : (
+                  <div className="flex h-full items-center justify-center">
+                    <p className="text-muted-foreground">No data available for the selected period</p>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
         :activeTab==="Balances"?
         <div className="grid gap-4 pb-8">
           <Card title="Dues on filtered Expenses" titleDescription="Outstanding balances between members">

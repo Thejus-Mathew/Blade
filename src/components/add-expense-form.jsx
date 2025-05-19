@@ -196,7 +196,7 @@ export default function AddExpenseForm({ members , types}) {
             <select
               id="paidBy"
               className="w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-purple-600 dark:text-gray-200"
-              {...register("paidBy", { required: "Paid by is required" })}
+              {...register("paidBy", { required: "Paid by is required", onChange:(e)=>{if(e.target.value) setSelectedMembers({...selectedMembers,[e.target.value]:true})}})}
             >
               <option value="" className="dark:text-gray-800">Select a person</option>
               {members.map((member) => (
