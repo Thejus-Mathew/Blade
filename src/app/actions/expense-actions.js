@@ -37,19 +37,14 @@ export async function getAllExpensesAction(filters) {
     const query = {}    
 
     if (startDate && endDate) {
-      const start = new Date(...startDate.split("-").map((n, i) => i === 1 ? +n - 1 : +n));
-      const end = new Date(...endDate.split("-").map((n, i) => i === 1 ? +n - 1 : +n));
-      
-      query.date = {
-        $gte: start,
-        $lte: end
+        query.date = {
+        $gte: new Date(`${startDate}T00:00:00+05:30`),
+        $lte: new Date(`${endDate}T00:00:00+05:30`)
       };
     } else if (startDate) {
-      const start = new Date(...startDate.split("-").map((n, i) => i === 1 ? +n - 1 : +n));
-      query.date = { $gte: start };
+      query.date = { $gte: new Date(`${startDate}T00:00:00+05:30`) };
     } else if (endDate) {
-      const end = new Date(...endDate.split("-").map((n, i) => i === 1 ? +n - 1 : +n));
-      query.date = { $lte: end };
+      query.date = { $lte: new Date(`${endDate}T00:00:00+05:30`) };
     }
 
     if (paidBy) {
@@ -139,25 +134,21 @@ export async function getAnExpenseAction(id) {
   }
 }
 export async function getExpensesAction(startDate, endDate, paidBy, type,paidThrough, page=1) {  
+  
   try {
     await connectDB()
     const limit = 13
     const query = {}
     
-    if (startDate && endDate) {
-      const start = new Date(...startDate.split("-").map((n, i) => i === 1 ? +n - 1 : +n));
-      const end = new Date(...endDate.split("-").map((n, i) => i === 1 ? +n - 1 : +n));
-      
+    if (startDate && endDate) {      
       query.date = {
-        $gte: start,
-        $lte: end
+        $gte: new Date(`${startDate}T00:00:00+05:30`),
+        $lte: new Date(`${endDate}T00:00:00+05:30`)
       };
     } else if (startDate) {
-      const start = new Date(...startDate.split("-").map((n, i) => i === 1 ? +n - 1 : +n));
-      query.date = { $gte: start };
+      query.date = { $gte: new Date(`${startDate}T00:00:00+05:30`) };
     } else if (endDate) {
-      const end = new Date(...endDate.split("-").map((n, i) => i === 1 ? +n - 1 : +n));
-      query.date = { $lte: end };
+      query.date = { $lte: new Date(`${endDate}T00:00:00+05:30`) };
     }
 
     if (paidBy) {
