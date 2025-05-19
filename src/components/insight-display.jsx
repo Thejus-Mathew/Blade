@@ -58,9 +58,9 @@ export default function InsightDisplay({ members, types, expenses }) {
         obj[item.type]=(obj[item.type] || 0) + item.amount
         return obj
       },{})
-      return {timeData:Object.entries(timeData).map(([date,amount])=>({date,amount})),typeData:Object.entries(typeData).map(([name,amount])=>({name,amount})).sort((a, b) => b.amount - a.amount)}
+      return {timeData:Object.entries(timeData).map(([date,amount])=>({date,amount})).sort((a, b) => a.date.localeCompare(b.date)),typeData:Object.entries(typeData).map(([name,amount])=>({name,amount})).sort((a, b) => b.amount - a.amount)}
     })
-  },[individual])  
+  },[individual,expenses])  
 
   const[isDarkMode,setIsDarkMode] = useState(true)
   useEffect(() => {

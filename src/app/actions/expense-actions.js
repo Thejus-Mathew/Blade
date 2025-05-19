@@ -37,14 +37,19 @@ export async function getAllExpensesAction(filters) {
     const query = {}    
 
     if (startDate && endDate) {
+      const start = new Date(...startDate.split("-").map((n, i) => i === 1 ? +n - 1 : +n));
+      const end = new Date(...endDate.split("-").map((n, i) => i === 1 ? +n - 1 : +n));
+      
       query.date = {
-        $gte: new Date(`${startDate}T00:00:00`),
-        $lte: new Date(`${endDate}T00:00:00`),
-      }
+        $gte: start,
+        $lte: end
+      };
     } else if (startDate) {
-      query.date = { $gte: new Date(`${startDate}T00:00:00`) }
+      const start = new Date(...startDate.split("-").map((n, i) => i === 1 ? +n - 1 : +n));
+      query.date = { $gte: start };
     } else if (endDate) {
-      query.date = { $lte: new Date(`${endDate}T00:00:00`) }
+      const end = new Date(...endDate.split("-").map((n, i) => i === 1 ? +n - 1 : +n));
+      query.date = { $lte: end };
     }
 
     if (paidBy) {
@@ -138,16 +143,21 @@ export async function getExpensesAction(startDate, endDate, paidBy, type,paidThr
     await connectDB()
     const limit = 13
     const query = {}
-
+    
     if (startDate && endDate) {
+      const start = new Date(...startDate.split("-").map((n, i) => i === 1 ? +n - 1 : +n));
+      const end = new Date(...endDate.split("-").map((n, i) => i === 1 ? +n - 1 : +n));
+      
       query.date = {
-        $gte: new Date(`${startDate}T00:00:00`),
-        $lte: new Date(`${endDate}T00:00:00`),
-      }
+        $gte: start,
+        $lte: end
+      };
     } else if (startDate) {
-      query.date = { $gte: new Date(`${startDate}T00:00:00`) }
+      const start = new Date(...startDate.split("-").map((n, i) => i === 1 ? +n - 1 : +n));
+      query.date = { $gte: start };
     } else if (endDate) {
-      query.date = { $lte: new Date(`${endDate}T00:00:00`) }
+      const end = new Date(...endDate.split("-").map((n, i) => i === 1 ? +n - 1 : +n));
+      query.date = { $lte: end };
     }
 
     if (paidBy) {
