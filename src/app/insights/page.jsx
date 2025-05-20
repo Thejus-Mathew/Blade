@@ -16,11 +16,12 @@ export default async function InsightsPage({searchParams}) {
     startDate = firstDay
   }
   const expensesResult = await getAllExpensesAction({startDate,endDate,paidBy,type,paidThrough})  
+  
   return (
     <div className="max-w-6xl mx-auto ">
         <h1 className="text-3xl font-bold mb-6">Insights</h1>
-        <InsightFilter members={members} types={types} params = {{startDate,endDate,paidBy,type,paidThrough}} />
-        <InsightDisplay members={members} types={types} expenses={expensesResult}/>
+        <InsightFilter members={members} types={types.filter(item=>item.name!=='Settle Due')} params = {{startDate,endDate,paidBy,type,paidThrough}} />
+        <InsightDisplay members={members} types={types.filter(item=>item.name!=='Settle Due')} expenses={expensesResult.filter(item=>item.type!=='Settle Due')}/>
     </div>
   )
 }

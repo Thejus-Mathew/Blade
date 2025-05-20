@@ -37,6 +37,7 @@ const COLORS = [
 ]
 
 export default function InsightDisplay({ members, types, expenses }) {
+  
   const [activeTab, setActiveTab] = useState("Overview");
   const [individual,setIndividual]=useState(members[0]?._id || null)
   const [individualData,setIndividualData]=useState({timeData:[],typeData:[]})
