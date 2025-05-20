@@ -6,6 +6,10 @@ const ExpenseSchema = new Schema({
     required: [true, "Expense type is required"],
     trim: true,
   },
+  otherInfo: {
+    type: String,
+    trim: true,
+  },
   totalAmount: {
     type: Number,
     required: [true, "Total amount is required"],

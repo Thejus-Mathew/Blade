@@ -11,7 +11,7 @@ const ExpensePage =async ({params}) => {
       <div className="bg-white dark:bg-gray-800 shadow-lg rounded-2xl p-6 space-y-4 border">
         <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4">
           <div>
-            <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-100">{expense?.type}</h2>
+            <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-100">{expense?.type}{expense?.otherInfo && ` - ${expense?.otherInfo}`}</h2>
             <p className="text-gray-600 dark:text-gray-400 text-sm">
               {new Date(expense?.date)?.toLocaleDateString()} | {new Date(expense?.date)?.toLocaleTimeString()} | Paid via {expense?.paidThrough}
             </p>

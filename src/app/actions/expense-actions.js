@@ -8,13 +8,14 @@ import Member from "@/models/member"
 export async function addExpenseAction(data) {
   try {
     await connectDB()
-
+    
     const expense = new Expense({
       type: data.type,
       totalAmount: data.totalAmount,
       paidBy: data.paidBy,
       splits: data.splits,
-      paidThrough: data.paidThrough
+      paidThrough: data.paidThrough,
+      otherInfo:data.type==='Others'?data.otherInfo:null
     })
 
     await expense.save()

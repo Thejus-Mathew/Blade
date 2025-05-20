@@ -277,7 +277,7 @@ export default function ExpensesDisplay({ members, types, expenses, params, tota
               <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
                 {expenses.map((expense) => (
                   <tr key={expense._id} className="hover:bg-gray-50 dark:hover:bg-gray-800">
-                    <td className="px-4 py-4 text-sm">{expense.type}</td>
+                    <td className="px-4 py-4 text-sm">{expense.type}{expense?.otherInfo && ` - ${expense?.otherInfo}`}</td>
                     <td className="px-4 py-4 text-sm min-w-[100px]">{expense.paidBy.name}</td>
                     <td className="px-4 py-4 text-sm min-w-[150px]">{formatDateTime(expense.date)}</td>
                     <td className="px-4 py-4 text-sm font-medium">{formatCurrency(expense.totalAmount)}</td>

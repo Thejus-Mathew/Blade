@@ -13,7 +13,7 @@ export default function AddExpenseForm({ members , types}) {
   const [selectedMembers, setSelectedMembers] = useState({})
   const [splitAmounts, setSplitAmounts] = useState({})
   const [manualSplits, setManualSplits] = useState({})
-
+  const [isOtherType,setIsOtherType]=useState(false)
   const {
     register,
     handleSubmit,
@@ -157,7 +157,7 @@ export default function AddExpenseForm({ members , types}) {
             <select
               id="type"
               className="w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-purple-600 dark:text-gray-200"
-              {...register("type", { required: "Expense type is required" })}
+              {...register("type", { required: "Expense type is required",onChange:(e)=>{setIsOtherType(e.target.value==='Others')} })}
             >
               <option value="" className="dark:text-gray-800">Select the Expense Type</option>
               {types.map((type) => (
@@ -169,6 +169,19 @@ export default function AddExpenseForm({ members , types}) {
             {errors.type && <p className="mt-1 text-sm text-red-600">{errors.type.message}</p>}
           </div>
 
+          {isOtherType && <div>
+            <label htmlFor="otherInfo" className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">
+              Expense Type*
+            </label>
+            <input
+              id="otherInfo"
+              type="text"
+              className="w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-purple-600"
+              placeholder="Expense Type"
+              {...register("otherInfo", {required: "Expense type is required"})}
+            />
+            {errors.otherInfo && <p className="mt-1 text-sm text-red-600">{errors.otherInfo.message}</p>}
+          </div>}
           <div>
             <label htmlFor="totalAmount" className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">
               Total Amount*
