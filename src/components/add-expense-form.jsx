@@ -14,6 +14,7 @@ export default function AddExpenseForm({ members , types}) {
   const [splitAmounts, setSplitAmounts] = useState({})
   const [manualSplits, setManualSplits] = useState({})
   const [isOtherType,setIsOtherType]=useState(false)
+  const [paidThrough,setPaidThrough]=useState('Bank Transfer')
   const {
     register,
     handleSubmit,
@@ -125,10 +126,15 @@ export default function AddExpenseForm({ members , types}) {
         }))
 
       // Submit expense
-      await addExpenseAction({
+      const res = await addExpenseAction({
         ...data,
         splits,
+        paidThrough
       })
+
+      if(!res.success){
+        throw new Error(res.message)
+      }
 
       toast.success("Expense added successfully")
 
@@ -220,27 +226,27 @@ export default function AddExpenseForm({ members , types}) {
             </select>
             {errors.paidBy && <p className="mt-1 text-sm text-red-600">{errors.paidBy.message}</p>}
           </div>
-
           <div>
-            <label htmlFor="paidThrough" className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">
-              Paid Through*
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">
+              Payment Mode
             </label>
-            <select
-              id="paidThrough"
-              className="w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-purple-600 dark:text-gray-200"
-              {...register("paidThrough", { required: "Paid Through is required" })}
-            >
-              <option value="" className="dark:text-gray-800">Select Payment Option</option>
-              <option className="dark:text-gray-800" value={"Credit Card"}>
-                {"Credit Card"}
-              </option>
-              <option className="dark:text-gray-800" value={"Bank Transfer"}>
-                {"Bank Transfer"}
-              </option>
-            </select>
-            {errors.paidThrough && <p className="mt-1 text-sm text-red-600">{errors.paidThrough.message}</p>}
+            <div className="w-full p-1 rounded-md border border-gray-300 flex justify-around">
+                <button type="button" onClick={() => setPaidThrough("Bank Transfer")} 
+                    className={`px-3 py-2 w-50 rounded-md text-sm font-medium transition ${paidThrough === "Bank Transfer"
+                        ? "bg-white dark:bg-gray-200 text-black dark:text-black shadow-sm"
+                        : "text-gray-500 dark:text-gray-300 hover:text-black dark:hover:text-white"}`}
+                >
+                    Bank Transfer
+                </button>
+                <button type="button" onClick={() => setPaidThrough("Credit Card")} 
+                    className={`px-3 py-1 w-50 rounded-md text-sm font-medium transition ${paidThrough === "Credit Card"
+                        ? "bg-white dark:bg-gray-200 text-black dark:text-black shadow-sm"
+                        : "text-gray-500 dark:text-gray-300 hover:text-black dark:hover:text-white"}`}
+                >
+                    Credit Card
+                </button>
+              </div>
           </div>
-
         </div>
 
         <div className="mt-6">

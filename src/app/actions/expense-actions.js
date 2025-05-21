@@ -6,6 +6,8 @@ import Expense from "@/models/expense"
 import Member from "@/models/member"
 
 export async function addExpenseAction(data) {
+  console.log(data);
+  
   try {
     await connectDB()
     
@@ -26,6 +28,7 @@ export async function addExpenseAction(data) {
     return { success: true }
   } catch (error) {
     console.error("Error adding expense:", error)
+    return {success:false,message:error.message|| 'Failed to Add Expense'}
   }
 }
 
