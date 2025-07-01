@@ -6,15 +6,9 @@ import InsightDisplay from "@/components/insight-display";
 export const dynamic = "force-dynamic";
 
 export default async function InsightsPage({searchParams}) {
-  let {startDate,endDate,paidBy,type,paidThrough} = await searchParams
+  const {startDate,endDate,paidBy,type,paidThrough} = await searchParams
   const members = await getMembersAction()
   const types = await getTypesAction()
-
-  if(!startDate){
-    const now = new Date();
-    const firstDay = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-01`;    
-    startDate = firstDay
-  }
   const expensesResult = await getAllExpensesAction({startDate,endDate,paidBy,type,paidThrough})  
   
   return (
