@@ -47,7 +47,7 @@ export default function InsightDisplay({ members, types, expenses }) {
       expenses.forEach(item=>{
         const split = item.splits.find(item2=>item2.member._id===individual)
         if(split){
-          arr.push({member:split.member.name,amount:split.amount,type:item.type,date:format(parseISO(item.date), 'yyyy-MM-dd')})
+          arr.push({member:split.member.name,amount:split.amount,type:item.type,date:format(parseISO(item.date), 'yyyy-MM')})
         }
       })
       const timeData = arr.reduce((obj,item)=>{
@@ -108,7 +108,7 @@ export default function InsightDisplay({ members, types, expenses }) {
   // Prepare data for time series chart
   const timeSeriesData = (() => {
     const expensesByDate = expenses.reduce((acc, expense) => {
-      const date = format(parseISO(expense.date), 'yyyy-MM-dd')
+      const date = format(parseISO(expense.date), 'yyyy-MM')
       acc[date] = (acc[date] || 0) + expense.totalAmount
       return acc
     }, {})
@@ -280,7 +280,7 @@ export default function InsightDisplay({ members, types, expenses }) {
                     <ResponsiveContainer width="100%" height="100%">
                       <LineChart data={timeSeriesData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
                         <CartesianGrid strokeDasharray="3 3" />
-                        <XAxis dataKey="date" tickFormatter={(date) => format(parseISO(date), "MMM dd")} tick={{ fill: isDarkMode ? "#b9b9b9" : "#707070" }}/>
+                        <XAxis dataKey="date" tickFormatter={(date) => format(parseISO(date), "yyyy MMM")} tick={{ fill: isDarkMode ? "#b9b9b9" : "#707070" }}/>
                         <YAxis tick={{ fill: isDarkMode ? "#b9b9b9" : "#707070" }}/>
                         <Tooltip
                         contentStyle={{
@@ -499,7 +499,7 @@ export default function InsightDisplay({ members, types, expenses }) {
                   <ResponsiveContainer width="100%" height="100%">
                     <LineChart data={individualData.timeData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
                       <CartesianGrid strokeDasharray="3 3" />
-                      <XAxis dataKey="date" tickFormatter={(date) => format(parseISO(date), "MMM dd")} tick={{ fill: isDarkMode ? "#b9b9b9" : "#707070" }}/>
+                      <XAxis dataKey="date" tickFormatter={(date) => format(parseISO(date), "yyyy MMM")} tick={{ fill: isDarkMode ? "#b9b9b9" : "#707070" }}/>
                       <YAxis tick={{ fill: isDarkMode ? "#b9b9b9" : "#707070" }}/>
                       <Tooltip
                       contentStyle={{
